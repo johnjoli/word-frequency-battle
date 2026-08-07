@@ -1,15 +1,24 @@
 package com.bootcamp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class WordCounter {
-    public Map<String, Long> countWords(Path filePath) throws IOException {
+    private static final Logger logger = LoggerFactory.getLogger(WordCounter.class);
 
-        String content = Files.readString(filePath).toLowerCase().replaceAll("[^a-zа-я0-9\\s]", " ");
+    public Map<String, Long> countWords(Path filePath) throws IOException {
+        String content = Files.readString(filePath)
+                .toLowerCase().
+                replaceAll("[^a-zа-я0-9\\s]", " ");
+
         String[] words = content.split("\\s+");
 
         Map<String, Long> map = new HashMap<>();
@@ -19,20 +28,7 @@ public class WordCounter {
                 map.merge(word, 1L, Long::sum);
             }
         }
+        logger.debug("Подсчитано {} уникальных слов из файла {}", map.size(), filePath);
         return map;
-    }
-
-    public static void main(String[] args) throws IOException {
-        WordCounter wordCounter = new WordCounter();
-        try {
-            Map<String, Long> map = wordCounter.countWords(Path.of("file.txt"));
-
-            map.entrySet().stream()
-                    .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                    .limit(10)
-                    .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
-        } catch (IOException e) {
-            System.err.println("Ошибка чтения файла: " + e.getMessage());
-        }
     }
 }
