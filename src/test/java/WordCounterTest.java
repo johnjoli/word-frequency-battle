@@ -1,4 +1,4 @@
-import com.bootcamp.WordCounter;
+import com.bootcamp.service.WordCounter;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

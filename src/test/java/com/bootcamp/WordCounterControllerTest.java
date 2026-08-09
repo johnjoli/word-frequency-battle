@@ -1,7 +1,8 @@
 package com.bootcamp;
 
+import com.bootcamp.controller.WordCounterController;
+import com.bootcamp.service.WordCounter;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -55,7 +56,7 @@ public class WordCounterControllerTest {
     }
 
     @Test
-    void uploadFile_emptyMultipartFile_shouldReturn400() throws Exception {
+    void uploadFile_emptyMultipartFile_shouldReturnEmptyJson() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "empty.txt", "text/plain", new byte[0]
         );

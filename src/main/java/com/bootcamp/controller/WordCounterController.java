@@ -1,5 +1,8 @@
-package com.bootcamp;
+package com.bootcamp.controller;
 
+import com.bootcamp.exception.EmptyFileException;
+import com.bootcamp.exception.FileProcessingException;
+import com.bootcamp.service.WordCounter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

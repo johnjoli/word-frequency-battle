@@ -1,6 +1,4 @@
-package com.bootcamp;
-
-import java.nio.file.Files;
+package com.bootcamp.exception;
 
 public class FileProcessingException extends RuntimeException {
     public FileProcessingException(String message) {
