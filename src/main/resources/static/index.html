@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8">
+		<title>Word Frequency Counter</title>
+	</head>
+	<body>
+		<h1>Подсчёт частоты слов</h1>
+		<input type="file" id="fileInput" accept=".txt">
+		<button onclick="uploadFile()">Загрузить</button>
+		<pre id="result"></pre>
+
+		<script>
+			async function uploadFile() {
+			    const fileInput = document.getElementById('fileInput');
+			    const resultDiv = document.getElementById('result');
+			    if (!fileInput.files[0]) {
+				resultDiv.textContent = 'Пожалуйста, выберите файл.';
+				return;
+			    }
+			    const formData = new FormData();
+			    formData.append('file', fileInput.files[0]);
+			    try {
+				const response = await fetch('/api/words/upload', {
+				    method: 'POST',
+				    body: formData
+				});
+				if (!response.ok) {
+				    const error = await response.json();
+				    resultDiv.textContent = 'Ошибка: ' + error.error;
+				    return;
+				}
+				const data = await response.json();
+				if (Object.keys(data).length === 0) {
+				    resultDiv.textContent = 'Файл пуст или не содержит слов.';
+				} else {
+				    // Превращаем объект в строку для отображения
+				    resultDiv.textContent = JSON.stringify(data, null, 2);
+				}
+			    } catch (err) {
+				resultDiv.textContent = 'Ошибка соединения: ' + err.message;
+			    }
+			}
+		</script>
+	</body>
+</html>
