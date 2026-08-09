@@ -1,6 +1,7 @@
 package com.bootcamp;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -42,6 +43,22 @@ public class WordCounterControllerTest {
                 "".getBytes()
         );
 
+        mockMvc.perform(multipart("/api/words/upload").file(file))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void uploadFile_noFile_shouldReturn400() throws Exception {
+        mockMvc.perform(multipart("/api/words/upload"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void uploadFile_emptyMultipartFile_shouldReturn400() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "empty.txt", "text/plain", new byte[0]
+        );
         mockMvc.perform(multipart("/api/words/upload").file(file))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty());

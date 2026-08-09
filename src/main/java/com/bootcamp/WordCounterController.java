@@ -22,7 +22,13 @@ public class WordCounterController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, Long>> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, Long>> uploadFile(
+            @RequestParam("file") MultipartFile file) {
+
+        if (file == null) {
+            throw new EmptyFileException("Файл не выбран");
+        }
+
         Path tempFile = null;
         try {
             tempFile = Files.createTempFile("upload_", ".txt");
@@ -30,7 +36,7 @@ public class WordCounterController {
             Map<String, Long> wordCounts = wordCounter.countWords(tempFile);
             return ResponseEntity.ok(wordCounts);
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
+            throw new FileProcessingException("Ошибка обработки файла");
         } finally {
             if (tempFile != null) {
                 try {
