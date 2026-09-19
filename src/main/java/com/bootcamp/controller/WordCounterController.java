@@ -82,4 +82,14 @@ public class WordCounterController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/history/{id}")
+    public ResponseEntity<Void> deleteResult(@PathVariable Long id) {
+        if (!repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }
