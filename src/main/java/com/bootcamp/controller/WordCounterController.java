@@ -5,9 +5,12 @@ import com.bootcamp.exception.EmptyFileException;
 import com.bootcamp.exception.FileProcessingException;
 import com.bootcamp.repository.WordCountResultRepository;
 import com.bootcamp.service.WordCountService;
-import com.bootcamp.service.WordCounter;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,8 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+
 
 @RestController
 @RequestMapping("/api/words")
@@ -58,8 +61,18 @@ public class WordCounterController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<List<WordCountResult>> getHistory() {
-        List<WordCountResult> history = repository.findAll();
+    public ResponseEntity<Page<WordCountResult>> getHistory(
+
+            @RequestParam(required = false) String fileName,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)LocalDateTime from,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
+        Page<WordCountResult> history = repository.findWithFilters(fileName, from, to, pageable);
         return ResponseEntity.ok(history);
     }
 
