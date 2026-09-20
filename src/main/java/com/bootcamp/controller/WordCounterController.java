@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 
 @RestController
@@ -90,6 +91,15 @@ public class WordCounterController {
         }
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/top")
+    public ResponseEntity<Map<String, Long>> getTopWords(
+            @RequestParam(defaultValue = "10") int limit) {
+        if (limit <= 0 || limit > 100) {
+            throw new IllegalArgumentException("limit must be between 1 and 100");
+        }
+        return ResponseEntity.ok(wordCountService.getTopWords(limit));
     }
 
 }

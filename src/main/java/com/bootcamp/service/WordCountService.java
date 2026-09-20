@@ -8,7 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -27,5 +31,22 @@ public class WordCountService {
         Map<String, Long> counts = wordCounter.countWords(filePath);
         WordCountResult result = new WordCountResult(originalFileName, counts);
         return repository.save(result);
+    }
+
+    public Map<String, Long> getTopWords(int limit) {
+        List<WordCountResult> allResults = repository.findAll();
+
+        Map<String, Long> totalCounts = new HashMap<>();
+        for (WordCountResult result : allResults) {
+            for (Map.Entry<String, Long> entry : result.getWordCounts().entrySet()) {
+                totalCounts.merge(entry.getKey(), entry.getValue(),Long::sum);
+            }
+        }
+        return totalCounts.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(limit)
+                .collect(LinkedHashMap::new,
+                        (map, e) -> map.put(e.getKey(), e.getValue()),
+                        LinkedHashMap::putAll);
     }
 }
