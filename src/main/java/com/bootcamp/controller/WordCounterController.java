@@ -4,7 +4,6 @@ import com.bootcamp.dto.StatsResponse;
 import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.exception.EmptyFileException;
 import com.bootcamp.exception.FileProcessingException;
-import com.bootcamp.repository.WordCountResultRepository;
 import com.bootcamp.service.WordCountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,19 +21,15 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("/api/words")
 public class WordCounterController {
 
     private final WordCountService wordCountService;
-    private final WordCountResultRepository repository;
 
     @Autowired
-    public WordCounterController(WordCountService wordCountService,
-                                 WordCountResultRepository repository) {
+    public WordCounterController(WordCountService wordCountService) {
         this.wordCountService = wordCountService;
-        this.repository = repository;
     }
 
     @PostMapping("/upload")
@@ -45,12 +40,10 @@ public class WordCounterController {
 
         Path tempFile = null;
         try {
-            tempFile = Files.createTempFile("upload_", "txt");
+            tempFile = Files.createTempFile("upload_", ".txt");
             file.transferTo(tempFile.toFile());
-
-            WordCountResult resul = wordCountService.processFile(tempFile, file.getOriginalFilename());
-
-            return ResponseEntity.ok(resul);
+            WordCountResult result = wordCountService.processFile(tempFile, file.getOriginalFilename());
+            return ResponseEntity.ok(result);
         } catch (IOException e) {
             throw new FileProcessingException("Ошибка обработки файла");
         } finally {
@@ -64,33 +57,30 @@ public class WordCounterController {
 
     @GetMapping("/history")
     public ResponseEntity<Page<WordCountResult>> getHistory(
-
             @RequestParam(required = false) String fileName,
             @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)LocalDateTime from,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("processedAt").descending());
-        Page<WordCountResult> history = repository.findWithFilters(fileName, from, to, pageable);
-        return ResponseEntity.ok(history);
+        return ResponseEntity.ok(wordCountService.getHistory(fileName, from, to, pageable));
     }
 
     @GetMapping("/history/{id}")
     public ResponseEntity<WordCountResult> getResultById(@PathVariable Long id) {
-        return repository.findById(id)
+        return wordCountService.getResultById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/history/{id}")
     public ResponseEntity<Void> deleteResult(@PathVariable Long id) {
-        if (!repository.existsById(id)) {
+        if (!wordCountService.deleteResult(id)) {
             return ResponseEntity.notFound().build();
         }
-        repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -107,5 +97,4 @@ public class WordCounterController {
     public ResponseEntity<StatsResponse> getStats() {
         return ResponseEntity.ok(wordCountService.getStats());
     }
-
 }

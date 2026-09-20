@@ -4,15 +4,15 @@ import com.bootcamp.dto.StatsResponse;
 import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.repository.WordCountResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,5 +76,22 @@ public class WordCountService {
         }
 
         return new StatsResponse(totalFiles, uniqueWords, topWord, topWordCount);
+    }
+
+    public Page<WordCountResult> getHistory(String fileName, LocalDateTime from,
+                                            LocalDateTime to, Pageable pageable) {
+        return repository.findWithFilters(fileName, from, to, pageable);
+    }
+
+    public Optional<WordCountResult> getResultById(Long id) {
+        return repository.findById(id);
+    }
+
+    public boolean deleteResult(Long id) {
+        if (!repository.existsById(id)) {
+            return false;
+        }
+        repository.deleteById(id);
+        return true;
     }
 }
