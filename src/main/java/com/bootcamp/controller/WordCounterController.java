@@ -1,5 +1,6 @@
 package com.bootcamp.controller;
 
+import com.bootcamp.dto.StatsResponse;
 import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.exception.EmptyFileException;
 import com.bootcamp.exception.FileProcessingException;
@@ -100,6 +101,11 @@ public class WordCounterController {
             throw new IllegalArgumentException("limit must be between 1 and 100");
         }
         return ResponseEntity.ok(wordCountService.getTopWords(limit));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<StatsResponse> getStats() {
+        return ResponseEntity.ok(wordCountService.getStats());
     }
 
 }

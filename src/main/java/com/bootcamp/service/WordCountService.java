@@ -1,5 +1,6 @@
 package com.bootcamp.service;
 
+import com.bootcamp.dto.StatsResponse;
 import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.repository.WordCountResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,32 @@ public class WordCountService {
                 .collect(LinkedHashMap::new,
                         (map, e) -> map.put(e.getKey(), e.getValue()),
                         LinkedHashMap::putAll);
+    }
+
+    public StatsResponse getStats() {
+
+        List<WordCountResult> allResults = repository.findAll();
+
+        long totalFiles = allResults.size();
+
+        Map<String, Long> totalCounts = new HashMap<>();
+        for (WordCountResult result : allResults) {
+            for (Map.Entry<String, Long> entry : result.getWordCounts().entrySet()) {
+                totalCounts.merge(entry.getKey(), entry.getValue(), Long::sum);
+            }
+        }
+
+        int uniqueWords = totalCounts.size();
+
+        String topWord= null;
+        long topWordCount = 0;
+        for (Map.Entry<String, Long> entry : totalCounts.entrySet()) {
+            if (entry.getValue() > topWordCount) {
+                topWord = entry.getKey();
+                topWordCount = entry.getValue();
+            }
+        }
+
+        return new StatsResponse(totalFiles, uniqueWords, topWord, topWordCount);
     }
 }
