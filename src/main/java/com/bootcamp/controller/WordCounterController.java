@@ -7,6 +7,8 @@ import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.exception.EmptyFileException;
 import com.bootcamp.exception.FileProcessingException;
 import com.bootcamp.service.WordCountService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +28,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/words")
+@Validated
 public class WordCounterController {
 
     private final WordCountService wordCountService;
@@ -90,10 +94,10 @@ public class WordCounterController {
 
     @GetMapping("/top")
     public ResponseEntity<Map<String, Long>> getTopWords(
-            @RequestParam(defaultValue = "10") int limit) {
-        if (limit <= 0 || limit > 100) {
-            throw new IllegalArgumentException("limit must be between 1 and 100");
-        }
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "limit must be at least 1")
+            @Max(value = 100, message = "limit must be at most 100")
+            int limit) {
         return ResponseEntity.ok(wordCountService.getTopWords(limit));
     }
 
