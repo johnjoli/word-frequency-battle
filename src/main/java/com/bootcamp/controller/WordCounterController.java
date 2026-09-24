@@ -1,6 +1,8 @@
 package com.bootcamp.controller;
 
 import com.bootcamp.dto.StatsResponse;
+import com.bootcamp.dto.WordCountResultDto;
+import com.bootcamp.dto.WordCountResultSummaryDto;
 import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.exception.EmptyFileException;
 import com.bootcamp.exception.FileProcessingException;
@@ -56,7 +58,7 @@ public class WordCounterController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<Page<WordCountResult>> getHistory(
+    public ResponseEntity<Page<WordCountResultSummaryDto>> getHistory(
             @RequestParam(required = false) String fileName,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
@@ -70,10 +72,12 @@ public class WordCounterController {
     }
 
     @GetMapping("/history/{id}")
-    public ResponseEntity<WordCountResult> getResultById(@PathVariable Long id) {
-        return wordCountService.getResultById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<WordCountResultDto> getResultById(@PathVariable Long id) {
+        WordCountResultDto dto = wordCountService.getResultById(id);
+        if (dto == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("/history/{id}")

@@ -1,7 +1,10 @@
 package com.bootcamp.service;
 
 import com.bootcamp.dto.StatsResponse;
+import com.bootcamp.dto.WordCountResultDto;
+import com.bootcamp.dto.WordCountResultSummaryDto;
 import com.bootcamp.entity.WordCountResult;
+import com.bootcamp.mapper.WordCountResultMapper;
 import com.bootcamp.repository.WordCountResultRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,11 +24,13 @@ public class WordCountService {
 
     private final WordCounter wordCounter;
     private final WordCountResultRepository repository;
+    private final WordCountResultMapper mapper;
 
     @Autowired
-    public WordCountService(WordCounter wordCounter, WordCountResultRepository repository) {
+    public WordCountService(WordCounter wordCounter, WordCountResultRepository repository, WordCountResultMapper mapper) {
         this.wordCounter = wordCounter;
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     public WordCountResult processFile(Path filePath, String originalFileName) throws IOException {
@@ -74,17 +79,19 @@ public class WordCountService {
                 topWordCount = entry.getValue();
             }
         }
-
         return new StatsResponse(totalFiles, uniqueWords, topWord, topWordCount);
     }
 
-    public Page<WordCountResult> getHistory(String fileName, LocalDateTime from,
-                                            LocalDateTime to, Pageable pageable) {
-        return repository.findWithFilters(fileName, from, to, pageable);
+    public Page<WordCountResultSummaryDto> getHistory(String fileName, LocalDateTime from,
+                                                      LocalDateTime to, Pageable pageable) {
+       return repository.findWithFilters(fileName, from, to, pageable)
+               .map(mapper::toSummaryDto);
     }
 
-    public Optional<WordCountResult> getResultById(Long id) {
-        return repository.findById(id);
+    public WordCountResultDto getResultById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElse(null);
     }
 
     public boolean deleteResult(Long id) {

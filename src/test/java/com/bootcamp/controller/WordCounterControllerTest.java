@@ -1,7 +1,8 @@
 package com.bootcamp.controller;
 
-import com.bootcamp.controller.WordCounterController;
 import com.bootcamp.dto.StatsResponse;
+import com.bootcamp.dto.WordCountResultDto;
+import com.bootcamp.dto.WordCountResultSummaryDto;
 import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.service.WordCountService;
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
@@ -60,30 +59,40 @@ public class WordCounterControllerTest {
 
     // history
 
+    @Test
     void getHistory_shouldReturnPageOfResults() throws Exception {
-        WordCountResult r1 = new WordCountResult("a.txt", Map.of("java", 3L));
-        WordCountResult r2 = new WordCountResult("b.txt", Map.of("spring", 2L));
-        Page<WordCountResult> page = new PageImpl<>(List.of(r1, r2), PageRequest.of(0, 10), 2);
+        WordCountResultSummaryDto dto1 = new WordCountResultSummaryDto();
+        dto1.setId(1L);
+        dto1.setFileName("a.txt");
+        dto1.setUniqueWordsCount(3);
 
+        WordCountResultSummaryDto dto2 = new WordCountResultSummaryDto();
+        dto2.setId(2L);
+        dto2.setFileName("b.txt");
+        dto2.setUniqueWordsCount(2);
+
+        Page<WordCountResultSummaryDto> page = new PageImpl<>(List.of(dto1, dto2), PageRequest.of(0, 10), 2);
         when(wordCountService.getHistory(any(), any(), any(), any())).thenReturn(page);
 
-        mockMvc.perform(get("/api/words/history")
-                .param("page", "0")
-                .param("size", "10"))
+        mockMvc.perform(get("/api/words/history").param("page", "0").param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.totalElements").value(2))
                 .andExpect(jsonPath("$.content[0].fileName").value("a.txt"))
-                .andExpect(jsonPath("$.content[1].fileName").value("b.txt"));
+                .andExpect(jsonPath("$.content[0].uniqueWordsCount").value(3))
+                .andExpect(jsonPath("$.content[1].fileName").value("b.txt"))
+                .andExpect(jsonPath("$.content[1].uniqueWordsCount").value(2));
     }
 
     // history/{id}
 
     @Test
     void getResultById_whenExists_shouldReturn200() throws Exception {
-        WordCountResult r = new WordCountResult("test.txt", Map.of("java", 5L));
-        r.setId(42L);
-        when(wordCountService.getResultById(42L)).thenReturn(Optional.of(r));
+        WordCountResultDto dto = new WordCountResultDto();
+        dto.setId(42L);
+        dto.setFileName("test.txt");
+        dto.setWordCounts(Map.of("java", 5L));
+        when(wordCountService.getResultById(42L)).thenReturn(dto);
 
         mockMvc.perform(get("/api/words/history/42"))
                 .andExpect(status().isOk())
@@ -94,7 +103,7 @@ public class WordCounterControllerTest {
 
     @Test
     void getResultById_whenMissing_shouldReturn404() throws Exception {
-        when(wordCountService.getResultById(999L)).thenReturn(Optional.empty());
+        when(wordCountService.getResultById(999L)).thenReturn(null);
 
         mockMvc.perform(get("/api/words/history/999"))
                 .andExpect(status().isNotFound());

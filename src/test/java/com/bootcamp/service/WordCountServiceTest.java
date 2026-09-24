@@ -1,6 +1,7 @@
 package com.bootcamp.service;
 
 import com.bootcamp.entity.WordCountResult;
+import com.bootcamp.mapper.WordCountResultMapperImpl;
 import com.bootcamp.repository.WordCountResultRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 
 @DataJpaTest
-@Import({WordCountService.class, WordCounter.class})
+@Import({WordCountService.class, WordCounter.class, WordCountResultMapperImpl.class})
 @ActiveProfiles("test")
 class WordCountServiceTest {
 
