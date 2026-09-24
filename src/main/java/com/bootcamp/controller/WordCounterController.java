@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/words")
+@RequestMapping("/api/v1/words")
 @Validated
 public class WordCounterController {
 

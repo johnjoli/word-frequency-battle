@@ -44,7 +44,7 @@ public class WordCounterControllerTest {
                 "Java, java! Spring?".getBytes()
         );
 
-        mockMvc.perform(multipart("/api/words/upload").file(file))
+        mockMvc.perform(multipart("/api/v1/words/upload").file(file))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileName").value("test.txt"))
                 .andExpect(jsonPath("$.wordCounts.java").value(2))
@@ -53,7 +53,7 @@ public class WordCounterControllerTest {
 
     @Test
     void uploadFile_noFile_shouldReturn400() throws Exception {
-        mockMvc.perform(multipart("/api/words/upload"))
+        mockMvc.perform(multipart("/api/v1/words/upload"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -74,7 +74,7 @@ public class WordCounterControllerTest {
         Page<WordCountResultSummaryDto> page = new PageImpl<>(List.of(dto1, dto2), PageRequest.of(0, 10), 2);
         when(wordCountService.getHistory(any(), any(), any(), any())).thenReturn(page);
 
-        mockMvc.perform(get("/api/words/history").param("page", "0").param("size", "10"))
+        mockMvc.perform(get("/api/v1/words/history").param("page", "0").param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.totalElements").value(2))
@@ -94,7 +94,7 @@ public class WordCounterControllerTest {
         dto.setWordCounts(Map.of("java", 5L));
         when(wordCountService.getResultById(42L)).thenReturn(dto);
 
-        mockMvc.perform(get("/api/words/history/42"))
+        mockMvc.perform(get("/api/v1/words/history/42"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(42))
                 .andExpect(jsonPath("$.fileName").value("test.txt"))
@@ -105,7 +105,7 @@ public class WordCounterControllerTest {
     void getResultById_whenMissing_shouldReturn404() throws Exception {
         when(wordCountService.getResultById(999L)).thenReturn(null);
 
-        mockMvc.perform(get("/api/words/history/999"))
+        mockMvc.perform(get("/api/v1/words/history/999"))
                 .andExpect(status().isNotFound());
     }
 
@@ -115,7 +115,7 @@ public class WordCounterControllerTest {
     void deleteResult_whenExists_shouldReturn204() throws Exception {
         when(wordCountService.deleteResult(42L)).thenReturn(true);
 
-        mockMvc.perform(delete("/api/words/history/42"))
+        mockMvc.perform(delete("/api/v1/words/history/42"))
                 .andExpect(status().isNoContent());
     }
 
@@ -123,7 +123,7 @@ public class WordCounterControllerTest {
     void deleteResult_whenMissing_shouldReturn404() throws Exception {
         when(wordCountService.deleteResult(999L)).thenReturn(false);
 
-        mockMvc.perform(delete("/api/words/history/999"))
+        mockMvc.perform(delete("/api/v1/words/history/999"))
                 .andExpect(status().isNotFound());
     }
 
@@ -134,7 +134,7 @@ public class WordCounterControllerTest {
         Map<String, Long> top = Map.of("java", 10L, "spring", 7L, "boot", 4L);
         when(wordCountService.getTopWords(3)).thenReturn(top);
 
-        mockMvc.perform(get("/api/words/top").param("limit", "3"))
+        mockMvc.perform(get("/api/v1/words/top").param("limit", "3"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.java").value(10))
                 .andExpect(jsonPath("$.spring").value(7))
@@ -143,7 +143,7 @@ public class WordCounterControllerTest {
 
     @Test
     void getTopWords_invalidLimit_shouldReturn400() throws Exception {
-        mockMvc.perform(get("/api/words/top").param("limit", "0"))
+        mockMvc.perform(get("/api/v1/words/top").param("limit", "0"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -154,7 +154,7 @@ public class WordCounterControllerTest {
         StatsResponse stats = new StatsResponse(5L, 42, "java", 27L);
         when(wordCountService.getStats()).thenReturn(stats);
 
-        mockMvc.perform(get("/api/words/stats"))
+        mockMvc.perform(get("/api/v1/words/stats"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalFilesProcessed").value(5))
                 .andExpect(jsonPath("$.totalUniqueWords").value(42))
