@@ -19,6 +19,10 @@ public class WordCountResult {
     @Column(name = "processed_at", nullable = false)
     private LocalDateTime processedAt;
 
+    @Version
+    @Column(name = "version", nullable = false)
+    private Long version;
+
     @ElementCollection
     @CollectionTable(name = "word_counts",
     joinColumns = @JoinColumn(name = "result_id"))
@@ -66,4 +70,8 @@ public class WordCountResult {
     public void setWordCounts(Map<String, Long> wordCounts) {
         this.wordCounts = wordCounts;
     }
+
+    public Long getVersion() { return version; }
+
+    public void setVersion(Long version) { this.version = version; }
 }
