@@ -94,7 +94,7 @@ public class WordCounterController {
 
     @GetMapping("/top")
     public ResponseEntity<Map<String, Long>> getTopWords(
-            @RequestParam(defaultValue = "10")
+            @RequestParam(defaultValue = "${word-counter.default-top-limit}")
             @Min(value = 1, message = "limit must be at least 1")
             @Max(value = 100, message = "limit must be at most 100")
             int limit) {

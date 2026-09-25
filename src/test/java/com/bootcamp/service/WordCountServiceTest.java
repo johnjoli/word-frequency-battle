@@ -1,11 +1,14 @@
 package com.bootcamp.service;
 
+import com.bootcamp.config.WordCounterProperties;
 import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.mapper.WordCountResultMapperImpl;
 import com.bootcamp.repository.WordCountResultRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -20,6 +23,14 @@ import java.util.Map;
 @Import({WordCountService.class, WordCounter.class, WordCountResultMapperImpl.class})
 @ActiveProfiles("test")
 class WordCountServiceTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        WordCounterProperties wordCounterProperties() {
+            return new WordCounterProperties();
+        }
+    }
 
     @Autowired
     private WordCountService wordCountService;
@@ -75,5 +86,4 @@ class WordCountServiceTest {
         assertTrue(wordCountService.deleteResult(saved.getId()));
         assertFalse(repository.existsById(saved.getId()));
     }
-
 }
