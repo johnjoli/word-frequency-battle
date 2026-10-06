@@ -6,6 +6,7 @@ import com.bootcamp.dto.WordCountResultSummaryDto;
 import com.bootcamp.entity.WordCountResult;
 import com.bootcamp.exception.EmptyFileException;
 import com.bootcamp.exception.FileProcessingException;
+import com.bootcamp.mapper.WordCountResultMapper;
 import com.bootcamp.service.WordCountService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -32,14 +33,18 @@ import java.util.Map;
 public class WordCounterController {
 
     private final WordCountService wordCountService;
+    private final WordCountResultMapper mapper;
 
     @Autowired
-    public WordCounterController(WordCountService wordCountService) {
+    public WordCounterController(WordCountService wordCountService,
+                                 WordCountResultMapper mapper) {
+
         this.wordCountService = wordCountService;
+        this.mapper = mapper;
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<WordCountResult> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<WordCountResultDto> uploadFile(@RequestParam("file") MultipartFile file) {
         if (file == null) {
             throw new EmptyFileException("Файл не выбран");
         }
@@ -49,7 +54,7 @@ public class WordCounterController {
             tempFile = Files.createTempFile("upload_", ".txt");
             file.transferTo(tempFile.toFile());
             WordCountResult result = wordCountService.processFile(tempFile, file.getOriginalFilename());
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(mapper.toDto(result));
         } catch (IOException e) {
             throw new FileProcessingException("Ошибка обработки файла");
         } finally {

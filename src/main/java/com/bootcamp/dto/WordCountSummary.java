@@ -1,4 +1,4 @@
-package com.bootcamp.entity;
+package com.bootcamp.dto;
 
 public record WordCountSummary(
         String word,

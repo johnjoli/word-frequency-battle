@@ -1,9 +1,12 @@
 package com.bootcamp.entity;
 
+import com.bootcamp.service.WordCounter;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Table(name = "word_count_results")
@@ -23,20 +26,29 @@ public class WordCountResult {
     @Column(name = "version", nullable = false)
     private Long version;
 
-    @ElementCollection
-    @CollectionTable(name = "word_counts",
-    joinColumns = @JoinColumn(name = "result_id"))
-    @MapKeyColumn(name = "word")
-    @Column(name = "count")
-    private Map<String, Long> wordCounts;
+    @OneToMany(
+            mappedBy = "result",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<WordCount> wordCounts = new ArrayList<>();
 
     public WordCountResult() {
     }
 
-    public WordCountResult(String fileName, Map<String, Long> wordCounts) {
+    public WordCountResult(String fileName) {
         this.fileName = fileName;
-        this.wordCounts = wordCounts;
         this.processedAt = LocalDateTime.now();
+    }
+
+    public void addWordCount(WordCount wordCount) {
+        wordCounts.add(wordCount);
+        wordCount.setResult(this);
+    }
+
+    public void removeWordCount(WordCount wordCount) {
+        wordCounts.remove(wordCount);
+        wordCount.setResult(null);
     }
 
     public String getFileName() {
@@ -51,10 +63,6 @@ public class WordCountResult {
         return processedAt;
     }
 
-    public Map<String, Long> getWordCounts() {
-        return wordCounts;
-    }
-
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
@@ -67,11 +75,15 @@ public class WordCountResult {
         this.processedAt = processedAt;
     }
 
-    public void setWordCounts(Map<String, Long> wordCounts) {
-        this.wordCounts = wordCounts;
-    }
-
     public Long getVersion() { return version; }
 
     public void setVersion(Long version) { this.version = version; }
+
+    public List<WordCount> getWordCounts() {
+        return wordCounts;
+    }
+
+    public void setWordCounts(List<WordCount> wordCounts) {
+        this.wordCounts = wordCounts;
+    }
 }

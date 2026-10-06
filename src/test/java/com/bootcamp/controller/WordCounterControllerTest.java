@@ -3,7 +3,9 @@ package com.bootcamp.controller;
 import com.bootcamp.dto.StatsResponse;
 import com.bootcamp.dto.WordCountResultDto;
 import com.bootcamp.dto.WordCountResultSummaryDto;
+import com.bootcamp.entity.WordCount;
 import com.bootcamp.entity.WordCountResult;
+import com.bootcamp.mapper.WordCountResultMapper;
 import com.bootcamp.service.WordCountService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,11 +35,28 @@ public class WordCounterControllerTest {
     @MockBean
     private WordCountService wordCountService;
 
+    @MockBean
+    private WordCountResultMapper mapper;
+
     // upload
 
     @Test
     void uploadFile_shouldReturnWordCounts() throws Exception {
-        WordCountResult mocked = new WordCountResult("test.txt", Map.of("java", 2L, "spring", 1L));
+        WordCountResult mocked = new WordCountResult("test.txt");
+        mocked.addWordCount(new WordCount("java", 2));
+        mocked.addWordCount(new WordCount("spring", 1));
+
+        WordCountResultDto dto = new WordCountResultDto();
+        dto.setFileName("test.txt");
+
+        Map<String, Long> wordCounts = new HashMap<>();
+        wordCounts.put("java", 2L);
+        wordCounts.put("spring", 1L);
+
+        dto.setWordCounts(wordCounts);
+
+        when(mapper.toDto(mocked)).thenReturn(dto);
+
         when(wordCountService.processFile(any(), eq("test.txt"))).thenReturn(mocked);
 
         MockMultipartFile file = new MockMultipartFile(

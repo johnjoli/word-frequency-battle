@@ -21,7 +21,7 @@
 			    const formData = new FormData();
 			    formData.append('file', fileInput.files[0]);
 			    try {
-				const response = await fetch('/api/words/upload', {
+				const response = await fetch('/api/v1/words/upload', {
 				    method: 'POST',
 				    body: formData
 				});
@@ -34,7 +34,6 @@
 				if (Object.keys(data).length === 0) {
 				    resultDiv.textContent = 'Файл пуст или не содержит слов.';
 				} else {
-				    // Превращаем объект в строку для отображения
 				    resultDiv.textContent = JSON.stringify(data, null, 2);
 				}
 			    } catch (err) {

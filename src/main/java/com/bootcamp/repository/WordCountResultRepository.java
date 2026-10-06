@@ -16,10 +16,12 @@ public interface WordCountResultRepository extends JpaRepository<WordCountResult
     @Query("SELECT w FROM WordCountResult w WHERE " +
     "(:fileName IS NULL OR w.fileName LIKE CONCAT('%', :fileName, '%')) AND " +
     "(:from IS NULL OR w.processedAt >= :from) AND " +
-    "(: to IS NULL OR w.processedAt <= :to)")
+    "(:to IS NULL OR w.processedAt <= :to)")
     Page<WordCountResult> findWithFilters(@Param("fileName") String fileName,
                                           @Param("from")LocalDateTime from,
                                           @Param("to") LocalDateTime to,
                                           Pageable pageable);
 
+    @Query("SELECT COUNT(w) FROM WordCountResult w")
+    long countTotalFiles();
 }
